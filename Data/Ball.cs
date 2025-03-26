@@ -1,22 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TPW.Data
+﻿namespace TP.ConcurrentProgramming.Data
 {
-    public class Ball
-    {
-        public Ball(float x, float y, float radius)
-        {
-            X = x;
-            Y = y;
-            Radius = radius;
-        }
+  internal class Ball : IBall
+  {
+    #region ctor
 
-        public float X { get; private set; }
-        public float Y { get; private set; }
-        public float Radius { get; private set; }
+    internal Ball(Vector initialPosition, Vector initialVelocity)
+    {
+      Position = initialPosition;
+      Velocity = initialVelocity;
     }
+
+    #endregion ctor
+
+    #region IBall
+
+    public event EventHandler<IVector>? NewPositionNotification;
+
+    public IVector Velocity { get; set; }
+
+    #endregion IBall
+
+    #region private
+
+    private Vector Position;
+
+    private void RaiseNewPositionChangeNotification()
+    {
+      NewPositionNotification?.Invoke(this, Position);
+    }
+
+    internal void Move(Vector delta)
+    {
+      Position = new Vector(Position.x + delta.x, Position.y + delta.y);
+      RaiseNewPositionChangeNotification();
+    }
+
+    #endregion private
+  }
 }
