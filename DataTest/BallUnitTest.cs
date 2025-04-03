@@ -6,8 +6,10 @@
     [TestMethod]
     public void ConstructorTestMethod()
     {
-      Vector testinVector = new Vector(0.0, 0.0);
-      Ball newInstance = new(testinVector, testinVector);
+      Vector testingVector = new Vector(0.0, 0.0);
+      Ball newInstance = new(testingVector, testingVector);
+      Assert.IsNotNull(newInstance);
+      Assert.IsNotNull(testingVector);
     }
 
     [TestMethod]

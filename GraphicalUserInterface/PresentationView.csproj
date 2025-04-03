@@ -19,6 +19,10 @@
     <NoWarn>1701;1702;IDE0001</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <EnableWindowsTargeting>True</EnableWindowsTargeting>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
