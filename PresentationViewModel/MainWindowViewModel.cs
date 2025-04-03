@@ -27,7 +27,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(MainWindowViewModel));
-      ModelLayer.Start(numberOfBalls);
+      ModelLayer.Start(NumberOfBalls);
       Observer.Dispose();
     }
 
@@ -69,6 +69,21 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     private IDisposable Observer = null;
     private ModelAbstractApi ModelLayer;
     private bool Disposed = false;
+
+    private int _numberOfBalls;
+
+    public int NumberOfBalls
+    {
+      get => _numberOfBalls;
+      set
+      {
+        if (_numberOfBalls != value)
+        {
+          _numberOfBalls = value;
+          RaisePropertyChanged(nameof(NumberOfBalls));
+        }
+      }
+    }
 
     #endregion private
   }

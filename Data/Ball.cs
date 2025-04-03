@@ -27,7 +27,7 @@
 
     private const double DefaultRadius = 20.0;
 
-    internal double Radius { get; init; }
+    private double Radius { get; init; }
 
     private void RaiseNewPositionChangeNotification()
     {
