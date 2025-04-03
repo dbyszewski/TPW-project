@@ -85,6 +85,22 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       }
     }
 
+    public string NumberOfBallsInput
+    {
+      get => _numberOfBalls.ToString();
+      set
+      {
+        if(int.TryParse(value, out int number) && number > 0)
+        {
+          NumberOfBalls = number;
+        }
+        else
+        {
+          NumberOfBalls = 1;
+        }
+        RaisePropertyChanged(nameof(NumberOfBallsInput));
+      }
+    }
     #endregion private
   }
 }

@@ -12,7 +12,7 @@
     <StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
             <TextBlock Text="Liczba kul: " VerticalAlignment="Center"/>
-            <TextBox Width="50" Text="{Binding NumberOfBalls, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+            <TextBox Width="50" Text="{Binding NumberOfBallsInput, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
             <Button Content="Start" Width="80" Margin="5" Click="ButtonStart_Click"/>
         </StackPanel>
 
