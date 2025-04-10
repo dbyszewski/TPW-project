@@ -1,5 +1,7 @@
 ﻿namespace TP.ConcurrentProgramming.Data
 {
+    //TODO
+    //Zamienic utworzonego Radiusa, na juz istniejacy Diameter - ModelAbstractApi.cs
   internal class Ball : IBall
   {
     #region ctor
