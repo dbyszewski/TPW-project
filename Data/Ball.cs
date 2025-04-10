@@ -25,7 +25,7 @@
 
     private Vector Position;
 
-    private const double DefaultRadius = 20.0;
+    private const double DefaultRadius = 15.0;
 
     private double Radius { get; init; }
 
@@ -37,32 +37,32 @@
     private const double MIN_X = 0;
     private const double MAX_X = 400;
     private const double MIN_Y = 0;
-    private const double MAX_Y = 400;
+    private const double MAX_Y = 420;
 
     internal void Move(Vector delta)
     {
       var newX = Position.x + delta.x;
       var newY = Position.y + delta.y;
 
-      if (newX - Radius < MIN_X)
+      if (newX <= MIN_X)
       {
-        newX = MIN_X + Radius;
+        newX = MIN_X;
         Velocity = new Vector(-Velocity.x, Velocity.y);
       }
-      else if (newX + Radius > MAX_X)
+      else if (newX + 2 * Radius >= MAX_X)
       {
-        newX = MAX_X - Radius;
+        newX = MAX_X - 2 * Radius;
         Velocity = new Vector(-Velocity.x, Velocity.y);
       }
 
-      if (newY - Radius < MIN_Y)
+      if (newY <= MIN_Y)
       {
-        newY = MIN_Y + Radius;
+        newY = MIN_Y;
         Velocity = new Vector(Velocity.x, -Velocity.y);
       }
-      else if (newY + Radius > MAX_Y)
+      else if (newY + 2 * Radius >= MAX_Y)
       {
-        newY = MAX_Y - Radius;
+        newY = MAX_Y - 2 * Radius;
         Velocity = new Vector(Velocity.x, -Velocity.y);
       }
 
