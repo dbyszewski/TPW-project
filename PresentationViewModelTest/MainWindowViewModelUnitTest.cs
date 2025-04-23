@@ -22,7 +22,8 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       {
         Random random = new Random();
         int numberOfBalls = random.Next(1, 10);
-        viewModel.Start(numberOfBalls);
+        viewModel.NumberOfBalls = numberOfBalls;
+        viewModel.Start(viewModel.NumberOfBalls);
         Assert.IsNotNull(viewModel.Balls);
         Assert.AreEqual<int>(0, nullModelFixture.Disposed);
         Assert.AreEqual<int>(numberOfBalls, nullModelFixture.Started);
@@ -40,7 +41,8 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       Assert.AreEqual<int>(0, viewModel.Balls.Count);
       Random random = new Random();
       int numberOfBalls = random.Next(1, 10);
-      viewModel.Start(numberOfBalls);
+      viewModel.NumberOfBalls = numberOfBalls;
+      viewModel.Start(viewModel.NumberOfBalls);
       Assert.AreEqual<int>(numberOfBalls, viewModel.Balls.Count);
       viewModel.Dispose();
       Assert.IsTrue(modelSimulator.Disposed);

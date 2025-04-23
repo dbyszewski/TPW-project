@@ -9,6 +9,8 @@
       DataAbstractAPI instance1 = DataAbstractAPI.GetDataLayer();
       DataAbstractAPI instance2 = DataAbstractAPI.GetDataLayer();
       Assert.AreSame<DataAbstractAPI>(instance1, instance2);
+      Assert.IsNotNull(instance1);
+      Assert.IsNotNull(instance2);
       instance1.Dispose();
       Assert.ThrowsException<ObjectDisposedException>(() => instance2.Dispose());
     }

@@ -4,16 +4,19 @@
   {
     public Ball(Data.IBall ball)
     {
+      UnderneathBall = ball;
       ball.NewPositionNotification += RaisePositionChangeEvent;
     }
 
     #region IBall
 
     public event EventHandler<IPosition>? NewPositionNotification;
+    public double Diameter => UnderneathBall.Diameter;
 
     #endregion IBall
 
     #region private
+    private Data.IBall UnderneathBall;
 
     private void RaisePositionChangeEvent(object? sender, Data.IVector e)
     {

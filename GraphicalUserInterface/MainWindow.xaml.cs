@@ -20,13 +20,21 @@ namespace TP.ConcurrentProgramming.PresentationView
   {
     public MainWindow()
     {
-      Random random = new Random();
       InitializeComponent();
       MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
       double screenWidth = SystemParameters.PrimaryScreenWidth;
       double screenHeight = SystemParameters.PrimaryScreenHeight;
-      viewModel.Start(random.Next(5, 10));
     }
+    
+    private void ButtonStart_Click(object sender, RoutedEventArgs e)
+    {
+      if (DataContext is MainWindowViewModel viewModel)
+      {
+        // Wywołanie metody Start z przekazaną wartością liczby kul
+        viewModel.Start(viewModel.NumberOfBalls);
+      }
+    }
+
 
     /// <summary>
     /// Raises the <seealso cref="System.Windows.Window.Closed"/> event.

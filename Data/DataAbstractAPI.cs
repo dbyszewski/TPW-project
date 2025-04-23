@@ -48,5 +48,9 @@
     event EventHandler<IVector> NewPositionNotification;
 
     IVector Velocity { get; set; }
+    /// <summary>
+    /// The diameter of the ball.
+    /// </summary>
+    double Diameter { get; }
   }
 }
