@@ -1,16 +1,14 @@
 ﻿namespace TP.ConcurrentProgramming.Data
 {
-    //TODO
-    //Zamienic utworzonego Radiusa, na juz istniejacy Diameter - ModelAbstractApi.cs
   internal class Ball : IBall
   {
     #region ctor
 
-    internal Ball(Vector initialPosition, Vector initialVelocity, double radius = DefaultRadius)
+    internal Ball(Vector initialPosition, Vector initialVelocity, double diameter = DefaultDiameter)
     {
       Position = initialPosition;
       Velocity = initialVelocity;
-      Radius = radius;
+      Diameter = diameter;
     }
 
     #endregion ctor
@@ -21,21 +19,21 @@
 
     public IVector Velocity { get; set; }
 
+    public double Diameter { get; private init; }
+
     #endregion IBall
 
     #region private
 
     private Vector Position;
 
-    private const double DefaultRadius = 15.0;
-
-    private double Radius { get; init; }
+    private const double DefaultDiameter = 30.0;
 
     private void RaiseNewPositionChangeNotification()
     {
       NewPositionNotification?.Invoke(this, Position);
     }
-    
+
     private const double MIN_X = 0;
     private const double MAX_X = 400;
     private const double MIN_Y = 0;
@@ -51,9 +49,9 @@
         newX = MIN_X;
         Velocity = new Vector(-Velocity.x, Velocity.y);
       }
-      else if (newX + 2 * Radius >= MAX_X)
+      else if (newX + Diameter >= MAX_X)
       {
-        newX = MAX_X - 2 * Radius;
+        newX = MAX_X - Diameter;
         Velocity = new Vector(-Velocity.x, Velocity.y);
       }
 
@@ -62,15 +60,14 @@
         newY = MIN_Y;
         Velocity = new Vector(Velocity.x, -Velocity.y);
       }
-      else if (newY + 2 * Radius >= MAX_Y)
+      else if (newY + Diameter >= MAX_Y)
       {
-        newY = MAX_Y - 2 * Radius;
+        newY = MAX_Y - Diameter;
         Velocity = new Vector(Velocity.x, -Velocity.y);
       }
 
       Position = new Vector(newX, newY);
 
-      
       Position = new Vector(Position.x + delta.x, Position.y + delta.y);
       RaiseNewPositionChangeNotification();
     }

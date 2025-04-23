@@ -51,5 +51,9 @@
   public interface IBall 
   {
     event EventHandler<IPosition> NewPositionNotification;
+    /// <summary>
+    /// The diameter of the ball.
+    /// </summary>
+    double Diameter { get; }
   }
 }

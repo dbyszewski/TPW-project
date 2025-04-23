@@ -8,10 +8,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
   internal class ModelBall : IBall
   {
+    private const double LogicalToDisplayScale = 2.0 / 3.0;
     public ModelBall(double top, double left, LogicIBall underneathBall)
     {
       TopBackingField = top;
       LeftBackingField = left;
+      Diameter = underneathBall.Diameter * LogicalToDisplayScale;
       underneathBall.NewPositionNotification += NewPositionNotification;
     }
 
@@ -41,7 +43,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       }
     }
 
-    public double Diameter { get; init; } = 0;
+    public double Diameter { get; init; }
 
     #region INotifyPropertyChanged
 
