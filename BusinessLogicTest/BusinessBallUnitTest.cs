@@ -20,6 +20,8 @@
     {
       public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+      public double Diameter => 30.0;
+
       public event EventHandler<Data.IVector>? NewPositionNotification;
 
       internal void Move()
