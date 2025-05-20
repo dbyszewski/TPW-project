@@ -33,6 +33,9 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
+    public double TableWidth => BusinessLogic.BusinessLogicAbstractAPI.TableWidth;
+    public double TableHeight => BusinessLogic.BusinessLogicAbstractAPI.TableHeight;
+
     #endregion public API
 
     #region IDisposable

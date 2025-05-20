@@ -44,9 +44,9 @@
     }
 
     private const double MIN_X = 0;
-    private const double MAX_X = 400;
+    private const double MAX_X = BusinessLogic.BusinessLogicAbstractAPI.TableWidth;
     private const double MIN_Y = 0;
-    private const double MAX_Y = 420;
+    private const double MAX_Y = BusinessLogic.BusinessLogicAbstractAPI.TableHeight;
 
     internal void Move(Vector delta)
     {

@@ -57,10 +57,18 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     private double TopBackingField;
     private double LeftBackingField;
+    private DateTime lastUpdateTime = DateTime.MinValue;
+    private const int MinUpdateIntervalMs = 32; // ~30 FPS
 
     private void NewPositionNotification(object sender, IPosition e)
     {
-      Top = e.y; Left = e.x;
+      var now = DateTime.Now;
+      if ((now - lastUpdateTime).TotalMilliseconds >= MinUpdateIntervalMs)
+      {
+        Top = e.y;
+        Left = e.x;
+        lastUpdateTime = now;
+      }
     }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

@@ -16,7 +16,7 @@
             <Button Content="Start" Width="80" Margin="5" Click="ButtonStart_Click"/>
         </StackPanel>
 
-        <Border BorderThickness="4" BorderBrush="Green" Height="420" Width="400">
+        <Border BorderThickness="4" BorderBrush="Green" Height="{Binding TableHeight}" Width="{Binding TableWidth}">
             <ItemsControl ItemsSource="{Binding Balls}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

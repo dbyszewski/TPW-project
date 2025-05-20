@@ -13,7 +13,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     public BusinessLogicImplementation()
     {
-      CollisionTimer = new Timer(new TimerCallback(HandleCollisionsCallback), null, 0, 16);
+      CollisionTimer = new Timer(new TimerCallback(HandleCollisionsCallback), null, 0, 32);
     }
 
     #endregion ctor
