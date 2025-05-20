@@ -25,8 +25,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       get { return TopBackingField; }
       private set
       {
-        if (TopBackingField == value)
-          return;
         TopBackingField = value;
         RaisePropertyChanged();
       }
@@ -37,8 +35,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       get { return LeftBackingField; }
       private set
       {
-        if (LeftBackingField == value)
-          return;
         LeftBackingField = value;
         RaisePropertyChanged();
       }
@@ -58,18 +54,11 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     private double TopBackingField;
     private double LeftBackingField;
-    private DateTime lastUpdateTime = DateTime.MinValue;
-    private const int MinUpdateIntervalMs = 32; // ~30 FPS
 
     private void NewPositionNotification(object sender, IPosition e)
     {
-      var now = DateTime.Now;
-      if ((now - lastUpdateTime).TotalMilliseconds >= MinUpdateIntervalMs)
-      {
-        Top = e.y;
-        Left = e.x;
-        lastUpdateTime = now;
-      }
+      Top = e.y;
+      Left = e.x;
     }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

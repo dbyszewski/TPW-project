@@ -30,8 +30,8 @@
 
     #region Constants
 
-    public const double TableWidth = 400.0;
-    public const double TableHeight = 420.0;
+    public const double TableWidth = 800.0;
+    public const double TableHeight = 840.0;
 
     #endregion Constants
 

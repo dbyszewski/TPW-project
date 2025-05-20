@@ -11,7 +11,7 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(async _ => await MoveAsync(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(32)); // ~30 FPS
+      MoveTimer = new Timer(_ => Move(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16)); // ~60 FPS
     }
 
     #endregion ctor
@@ -29,8 +29,8 @@ namespace TP.ConcurrentProgramming.Data
       for (int i = 0; i < numberOfBalls; i++)
       {
         Vector startingPosition = new(
-          random.Next((int)DefaultDiameter, (int)(400 - DefaultDiameter)), 
-          random.Next((int)DefaultDiameter, (int)(420 - DefaultDiameter))
+          random.Next((int)DefaultDiameter, (int)(800 - DefaultDiameter)), 
+          random.Next((int)DefaultDiameter, (int)(840 - DefaultDiameter))
         );
         Vector initialVelocity = new(
           (random.NextDouble() - 0.5) * 200, // -100 to 100
@@ -82,23 +82,18 @@ namespace TP.ConcurrentProgramming.Data
     private const double DefaultDiameter = 30.0;
     private const double TimeStep = 0.016; // 16ms
 
-    private async Task MoveAsync()
+    private void Move()
     {
       if (Disposed) return;
 
-      var moveTasks = BallsList.Select(async ball =>
+      foreach (var ball in BallsList)
       {
-        await Task.Run(() =>
-        {
-          Vector delta = new(
-            ball.Velocity.x * TimeStep,
-            ball.Velocity.y * TimeStep
-          );
-          ball.Move(delta);
-        });
-      });
-
-      await Task.WhenAll(moveTasks);
+        Vector delta = new(
+          ball.Velocity.x * TimeStep,
+          ball.Velocity.y * TimeStep
+        );
+        ball.Move(delta);
+      }
     }
 
     #endregion private

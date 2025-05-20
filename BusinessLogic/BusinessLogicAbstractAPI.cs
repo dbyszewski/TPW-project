@@ -14,8 +14,8 @@
     #region Layer API
 
     public static readonly Dimensions GetDimensions = new(10.0, 10.0, 10.0);
-    public static readonly double TableWidth = 400.0;
-    public static readonly double TableHeight = 420.0;
+    public static readonly double TableWidth = 800.0;
+    public static readonly double TableHeight = 840.0;
 
     public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
 
