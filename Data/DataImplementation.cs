@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -10,7 +11,7 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(32)); // ~30 FPS
+      MoveTimer = new Timer(async _ => await MoveAsync(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(32)); // ~30 FPS
     }
 
     #endregion ctor
@@ -77,23 +78,27 @@ namespace TP.ConcurrentProgramming.Data
 
     private readonly Timer MoveTimer;
     private readonly object LockObject = new();
-    private List<Ball> BallsList = [];
+    private readonly ConcurrentBag<Ball> BallsList = new();
     private const double DefaultDiameter = 30.0;
     private const double TimeStep = 0.016; // 16ms
 
-    private void Move(object? x)
+    private async Task MoveAsync()
     {
-      lock (LockObject)
+      if (Disposed) return;
+
+      var moveTasks = BallsList.Select(async ball =>
       {
-        foreach (Ball ball in BallsList)
+        await Task.Run(() =>
         {
           Vector delta = new(
             ball.Velocity.x * TimeStep,
             ball.Velocity.y * TimeStep
           );
           ball.Move(delta);
-        }
-      }
+        });
+      });
+
+      await Task.WhenAll(moveTasks);
     }
 
     #endregion private

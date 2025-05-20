@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using TP.ConcurrentProgramming.Data;
 using System.Diagnostics;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
+using System.Threading;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -13,7 +15,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     public BusinessLogicImplementation()
     {
-      CollisionTimer = new Timer(new TimerCallback(HandleCollisionsCallback), null, 0, 32);
+      CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 32);
     }
 
     #endregion ctor
@@ -38,22 +40,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     public override void HandleCollisions()
     {
-      lock (LockObject)
-      {
-        for (int i = 0; i < BallsList.Count; i++)
-        {
-          for (int j = i + 1; j < BallsList.Count; j++)
-          {
-            var ball1 = BallsList[i];
-            var ball2 = BallsList[j];
-
-            if (CheckCollision(ball1, ball2))
-            {
-              ResolveCollision(ball1, ball2);
-            }
-          }
-        }
-      }
+      HandleCollisionsAsync().Wait();
     }
 
     #endregion BusinessLogicAbstractAPI
@@ -66,6 +53,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       {
         if (disposing)
         {
+          stopSource.SetResult(true);
           CollisionTimer.Dispose();
           BallsList.Clear();
         }
@@ -85,14 +73,41 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     #region private
 
+    private readonly ConcurrentBag<Ball> BallsList = new();
+    private readonly object LockObject = new();
     private bool Disposed = false;
     private readonly Timer CollisionTimer;
-    private readonly object LockObject = new();
-    private List<Ball> BallsList = [];
+    private readonly TaskCompletionSource<bool> stopSource = new();
 
-    private void HandleCollisionsCallback(object? state)
+    private async Task HandleCollisionsAsync()
     {
-      HandleCollisions();
+      if (Disposed || stopSource.Task.IsCompleted)
+        return;
+
+      var balls = BallsList.ToArray();
+      var collisionTasks = new List<Task>();
+
+      for (int i = 0; i < balls.Length; i++)
+      {
+        for (int j = i + 1; j < balls.Length; j++)
+        {
+          if (stopSource.Task.IsCompleted)
+            return;
+
+          var ball1 = balls[i];
+          var ball2 = balls[j];
+
+          collisionTasks.Add(Task.Run(async () =>
+          {
+            if (CheckCollision(ball1, ball2))
+            {
+              await Task.Run(() => ResolveCollision(ball1, ball2));
+            }
+          }));
+        }
+      }
+
+      await Task.WhenAll(collisionTasks);
     }
 
     private bool CheckCollision(Ball ball1, Ball ball2)

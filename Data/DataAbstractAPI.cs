@@ -28,6 +28,13 @@
 
     #endregion IDisposable
 
+    #region Constants
+
+    public const double TableWidth = 400.0;
+    public const double TableHeight = 420.0;
+
+    #endregion Constants
+
     #region private
 
     private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
