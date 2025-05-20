@@ -9,6 +9,11 @@
       return modelInstance.Value;
     }
 
+    public static IVector CreateVector(double x, double y)
+    {
+      return new Vector(x, y);
+    }
+
     #endregion Layer Factory
 
     #region public API
@@ -52,5 +57,17 @@
     /// The diameter of the ball.
     /// </summary>
     double Diameter { get; }
+    /// <summary>
+    /// The mass of the ball.
+    /// </summary>
+    double Mass { get; }
+    /// <summary>
+    /// Gets the current position of the ball.
+    /// </summary>
+    IVector Position { get; }
+    /// <summary>
+    /// Updates the velocity of the ball.
+    /// </summary>
+    void UpdateVelocity(IVector newVelocity);
   }
 }

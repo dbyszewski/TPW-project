@@ -4,11 +4,12 @@
   {
     #region ctor
 
-    internal Ball(Vector initialPosition, Vector initialVelocity, double diameter = DefaultDiameter)
+    internal Ball(Vector initialPosition, Vector initialVelocity, double diameter = DefaultDiameter, double mass = DefaultMass)
     {
       Position = initialPosition;
       Velocity = initialVelocity;
       Diameter = diameter;
+      Mass = mass;
     }
 
     #endregion ctor
@@ -21,13 +22,21 @@
 
     public double Diameter { get; private init; }
 
+    public double Mass { get; private init; }
+
+    public IVector Position { get; private set; }
+
+    public void UpdateVelocity(IVector newVelocity)
+    {
+      Velocity = newVelocity;
+    }
+
     #endregion IBall
 
     #region private
 
-    private Vector Position;
-
     private const double DefaultDiameter = 30.0;
+    private const double DefaultMass = 1.0;
 
     private void RaiseNewPositionChangeNotification()
     {
@@ -67,8 +76,6 @@
       }
 
       Position = new Vector(newX, newY);
-
-      Position = new Vector(Position.x + delta.x, Position.y + delta.y);
       RaiseNewPositionChangeNotification();
     }
 

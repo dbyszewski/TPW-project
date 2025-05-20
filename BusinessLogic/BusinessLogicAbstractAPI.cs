@@ -17,6 +17,8 @@
 
     public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
 
+    public abstract void HandleCollisions();
+
     #region IDisposable
 
     public abstract void Dispose();
@@ -55,5 +57,13 @@
     /// The diameter of the ball.
     /// </summary>
     double Diameter { get; }
+    /// <summary>
+    /// The mass of the ball.
+    /// </summary>
+    double Mass { get; }
+    /// <summary>
+    /// Gets the current position of the ball.
+    /// </summary>
+    IPosition Position { get; }
   }
 }

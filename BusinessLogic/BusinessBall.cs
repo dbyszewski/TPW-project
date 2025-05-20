@@ -1,6 +1,10 @@
-﻿namespace TP.ConcurrentProgramming.BusinessLogic
+﻿using System;
+using System.Threading.Tasks;
+using TP.ConcurrentProgramming.Data;
+
+namespace TP.ConcurrentProgramming.BusinessLogic
 {
-  internal class Ball : IBall
+  public class Ball : IBall
   {
     public Ball(Data.IBall ball)
     {
@@ -12,11 +16,13 @@
 
     public event EventHandler<IPosition>? NewPositionNotification;
     public double Diameter => UnderneathBall.Diameter;
+    public double Mass => UnderneathBall.Mass;
+    public IPosition Position => new Position(UnderneathBall.Position.x, UnderneathBall.Position.y);
 
     #endregion IBall
 
     #region private
-    private Data.IBall UnderneathBall;
+    internal readonly Data.IBall UnderneathBall;
 
     private void RaisePositionChangeEvent(object? sender, Data.IVector e)
     {

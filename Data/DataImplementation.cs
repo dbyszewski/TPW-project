@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -9,7 +10,7 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16)); // ~60 FPS
     }
 
     #endregion ctor
@@ -22,11 +23,17 @@ namespace TP.ConcurrentProgramming.Data
         throw new ObjectDisposedException(nameof(DataImplementation));
       if (upperLayerHandler == null)
         throw new ArgumentNullException(nameof(upperLayerHandler));
+
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
         Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-        Ball newBall = new(startingPosition, startingPosition);
+        Vector initialVelocity = new(
+          (random.NextDouble() - 0.5) * 200, // -100 to 100
+          (random.NextDouble() - 0.5) * 200
+        );
+        double mass = random.NextDouble() * 2 + 0.5; // 0.5 to 2.5
+        Ball newBall = new(startingPosition, initialVelocity, DefaultDiameter, mass);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
@@ -66,13 +73,24 @@ namespace TP.ConcurrentProgramming.Data
     private bool Disposed = false;
 
     private readonly Timer MoveTimer;
-    private Random RandomGenerator = new();
+    private readonly object LockObject = new();
     private List<Ball> BallsList = [];
+    private const double DefaultDiameter = 30.0;
+    private const double TimeStep = 0.016; // 16ms
 
     private void Move(object? x)
     {
-      foreach (Ball item in BallsList)
-        item.Move(new Vector((- 0.5) * 10, (- 0.5) * 10));
+      lock (LockObject)
+      {
+        foreach (Ball ball in BallsList)
+        {
+          Vector delta = new(
+            ball.Velocity.x * TimeStep,
+            ball.Velocity.y * TimeStep
+          );
+          ball.Move(delta);
+        }
+      }
     }
 
     #endregion private
