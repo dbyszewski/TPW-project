@@ -27,7 +27,10 @@ namespace TP.ConcurrentProgramming.Data
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
+        Vector startingPosition = new(
+          random.Next((int)DefaultDiameter, (int)(400 - DefaultDiameter)), 
+          random.Next((int)DefaultDiameter, (int)(420 - DefaultDiameter))
+        );
         Vector initialVelocity = new(
           (random.NextDouble() - 0.5) * 200, // -100 to 100
           (random.NextDouble() - 0.5) * 200

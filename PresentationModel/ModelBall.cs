@@ -8,7 +8,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
   internal class ModelBall : IBall
   {
-    private const double LogicalToDisplayScale = 2.0 / 3.0;
+    private const double LogicalToDisplayScale = 1.0;
     public ModelBall(double top, double left, LogicIBall underneathBall)
     {
       TopBackingField = top;

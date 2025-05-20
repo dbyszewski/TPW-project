@@ -53,23 +53,23 @@
       var newX = Position.x + delta.x;
       var newY = Position.y + delta.y;
 
-      if (newX <= MIN_X)
+      if (newX < MIN_X)
       {
         newX = MIN_X;
         Velocity = new Vector(-Velocity.x, Velocity.y);
       }
-      else if (newX + Diameter >= MAX_X)
+      else if (newX + Diameter > MAX_X)
       {
         newX = MAX_X - Diameter;
         Velocity = new Vector(-Velocity.x, Velocity.y);
       }
 
-      if (newY <= MIN_Y)
+      if (newY < MIN_Y)
       {
         newY = MIN_Y;
         Velocity = new Vector(Velocity.x, -Velocity.y);
       }
-      else if (newY + Diameter >= MAX_Y)
+      else if (newY + Diameter > MAX_Y)
       {
         newY = MAX_Y - Diameter;
         Velocity = new Vector(Velocity.x, -Velocity.y);
