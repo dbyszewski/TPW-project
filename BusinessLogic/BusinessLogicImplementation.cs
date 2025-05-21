@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using TP.ConcurrentProgramming.Data;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
-using System.Threading;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -15,6 +9,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     public BusinessLogicImplementation()
     {
+      CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 32);
+    }
+
+    public BusinessLogicImplementation(Data.DataAbstractAPI dataLayer)
+    {
+      this.dataLayer = dataLayer;
       CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 32);
     }
 
@@ -29,7 +29,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       if (upperLayerHandler == null)
         throw new ArgumentNullException(nameof(upperLayerHandler));
 
-      Data.DataAbstractAPI dataLayer = Data.DataAbstractAPI.GetDataLayer();
+      Data.DataAbstractAPI dataLayer = this.dataLayer ?? Data.DataAbstractAPI.GetDataLayer();
       dataLayer.Start(numberOfBalls, (position, ball) =>
       {
         Ball businessBall = new(ball);
@@ -56,6 +56,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
           stopSource.SetResult(true);
           CollisionTimer.Dispose();
           BallsList.Clear();
+          dataLayer?.Dispose();
         }
         Disposed = true;
       }
@@ -73,11 +74,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     #region private
 
+    private readonly Data.DataAbstractAPI? dataLayer;
     private readonly ConcurrentBag<Ball> BallsList = new();
     private readonly object LockObject = new();
     private bool Disposed = false;
     private readonly Timer CollisionTimer;
     private readonly TaskCompletionSource<bool> stopSource = new();
+
+    private const double MIN_X = 0;
+    private const double MAX_X = 800;
+    private const double MIN_Y = 0;
+    private const double MAX_Y = 840;
 
     private async Task HandleCollisionsAsync()
     {
@@ -89,6 +96,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
       for (int i = 0; i < balls.Length; i++)
       {
+        var ball = balls[i];
+        collisionTasks.Add(Task.Run(() => HandleWallCollisions(ball)));
+
         for (int j = i + 1; j < balls.Length; j++)
         {
           if (stopSource.Task.IsCompleted)
@@ -108,6 +118,45 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       }
 
       await Task.WhenAll(collisionTasks);
+    }
+
+    private void HandleWallCollisions(Ball ball)
+    {
+      var position = ball.Position;
+      var velocity = ball.UnderneathBall.Velocity;
+      var diameter = ball.Diameter;
+      var newX = position.x;
+      var newY = position.y;
+      var newVelocityX = velocity.x;
+      var newVelocityY = velocity.y;
+
+      if (newX < MIN_X && velocity.x < 0)
+      {
+        newX = MIN_X;
+        newVelocityX = -velocity.x;
+      }
+      else if (newX + diameter > MAX_X && velocity.x > 0)
+      {
+        newX = MAX_X - diameter;
+        newVelocityX = -velocity.x;
+      }
+
+      if (newY < MIN_Y && velocity.y < 0)
+      {
+        newY = MIN_Y;
+        newVelocityY = -velocity.y;
+      }
+      else if (newY + diameter > MAX_Y && velocity.y > 0)
+      {
+        newY = MAX_Y - diameter;
+        newVelocityY = -velocity.y;
+      }
+
+      // Aktualizacja pozycji i prędkości
+      if (newX != position.x || newY != position.y)
+      {
+        ball.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(newVelocityX, newVelocityY));
+      }
     }
 
     private bool CheckCollision(Ball ball1, Ball ball2)

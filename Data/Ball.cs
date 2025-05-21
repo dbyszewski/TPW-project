@@ -43,39 +43,9 @@
       NewPositionNotification?.Invoke(this, Position);
     }
 
-    private const double MIN_X = 0;
-    private const double MAX_X = 800;
-    private const double MIN_Y = 0;
-    private const double MAX_Y = 840;
-
     internal void Move(Vector delta)
     {
-      var newX = Position.x + delta.x;
-      var newY = Position.y + delta.y;
-
-      if (newX < MIN_X)
-      {
-        newX = MIN_X;
-        Velocity = new Vector(-Velocity.x, Velocity.y);
-      }
-      else if (newX + Diameter > MAX_X)
-      {
-        newX = MAX_X - Diameter;
-        Velocity = new Vector(-Velocity.x, Velocity.y);
-      }
-
-      if (newY < MIN_Y)
-      {
-        newY = MIN_Y;
-        Velocity = new Vector(Velocity.x, -Velocity.y);
-      }
-      else if (newY + Diameter > MAX_Y)
-      {
-        newY = MAX_Y - Diameter;
-        Velocity = new Vector(Velocity.x, -Velocity.y);
-      }
-
-      Position = new Vector(newX, newY);
+      Position = new Vector(Position.x + delta.x, Position.y + delta.y);
       RaiseNewPositionChangeNotification();
     }
 

@@ -19,7 +19,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     [TestMethod]
     public void DisposeTestMethod()
     {
-      DataLayerDisposeFixcure dataLayerFixcure = new DataLayerDisposeFixcure();
+      DataLayerDisposeFixcure dataLayerFixcure = new();
       BusinessLogicImplementation newInstance = new(dataLayerFixcure);
       Assert.IsFalse(dataLayerFixcure.Disposed);
       bool newInstanceDisposed = true;
@@ -101,11 +101,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
       private class DataBallFixture : Data.IBall
       {
-        public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public double Diameter { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public event EventHandler<Data.IVector>? NewPositionNotification;
+        public Data.IVector Velocity { get; set; } = new DataVectorFixture();
+        public double Diameter { get; } = 30.0;
+        public double Mass { get; } = 1.0;
+        public Data.IVector Position { get; } = new DataVectorFixture();
 
-        public event EventHandler<IVector>? NewPositionNotification = null;
-
+        public void UpdateVelocity(Data.IVector newVelocity)
+        {
+          throw new NotImplementedException();
+        }
       }
     }
 

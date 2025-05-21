@@ -18,11 +18,16 @@
 
     private class DataBallFixture : Data.IBall
     {
-      public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-      public double Diameter => 30.0;
-
       public event EventHandler<Data.IVector>? NewPositionNotification;
+      public Data.IVector Velocity { get; set; } = new VectorFixture(0, 0);
+      public double Diameter { get; } = 30.0;
+      public double Mass { get; } = 1.0;
+      public Data.IVector Position { get; } = new VectorFixture(0, 0);
+
+      public void UpdateVelocity(Data.IVector newVelocity)
+      {
+        Velocity = newVelocity;
+      }
 
       internal void Move()
       {
