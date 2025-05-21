@@ -41,30 +41,38 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
 
     #region testing instrumentation
 
-    private class UnderneathLayerFixture : BusinessLogicAbstractAPI
-    {
-      #region testing instrumentation
+        private class UnderneathLayerFixture : BusinessLogicAbstractAPI
+        {
+            #region testing instrumentation
 
-      internal bool Disposed = false;
-      internal int NumberOfBalls = 0;
+            internal bool Disposed = false;
+            internal int NumberOfBalls = 0;
 
-      #endregion testing instrumentation
+            #endregion testing instrumentation
 
-      #region BusinessLogicAbstractAPI
+            #region BusinessLogicAbstractAPI
 
-      public override void Dispose()
-      {
-        Disposed = true;
-      }
+            public override void Dispose()
+            {
+            Disposed = true;
+            }
 
-      public override void Start(int numberOfBalls, Action<IPosition, BusinessLogic.IBall> upperLayerHandler)
-      {
-        NumberOfBalls = numberOfBalls;
-        Assert.IsNotNull(upperLayerHandler);
-      }
 
-      #endregion BusinessLogicAbstractAPI
-    }
+            public override void HandleCollisions()
+            {
+            // Implementacja testowa
+            }
+
+            public override void Start(int numberOfBalls, Action<IPosition, BusinessLogic.IBall> upperLayerHandler)
+            {
+                NumberOfBalls = numberOfBalls;
+                Assert.IsNotNull(upperLayerHandler);
+            }
+
+
+
+            #endregion BusinessLogicAbstractAPI
+        }
 
     #endregion testing instrumentation
   }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TP.ConcurrentProgramming.BusinessLogic;
@@ -8,7 +9,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
   internal class ModelBall : IBall
   {
-    private const double LogicalToDisplayScale = 2.0 / 3.0;
+    private const double LogicalToDisplayScale = 1.0;
     public ModelBall(double top, double left, LogicIBall underneathBall)
     {
       TopBackingField = top;
@@ -24,8 +25,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       get { return TopBackingField; }
       private set
       {
-        if (TopBackingField == value)
-          return;
         TopBackingField = value;
         RaisePropertyChanged();
       }
@@ -36,8 +35,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       get { return LeftBackingField; }
       private set
       {
-        if (LeftBackingField == value)
-          return;
         LeftBackingField = value;
         RaisePropertyChanged();
       }
@@ -60,7 +57,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     private void NewPositionNotification(object sender, IPosition e)
     {
-      Top = e.y; Left = e.x;
+      Top = e.y;
+      Left = e.x;
     }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")

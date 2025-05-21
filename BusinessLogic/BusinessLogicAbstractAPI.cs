@@ -14,8 +14,12 @@
     #region Layer API
 
     public static readonly Dimensions GetDimensions = new(10.0, 10.0, 10.0);
+    public static readonly double TableWidth = 800.0;
+    public static readonly double TableHeight = 840.0;
 
     public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
+
+    public abstract void HandleCollisions();
 
     #region IDisposable
 
@@ -55,5 +59,13 @@
     /// The diameter of the ball.
     /// </summary>
     double Diameter { get; }
+    /// <summary>
+    /// The mass of the ball.
+    /// </summary>
+    double Mass { get; }
+    /// <summary>
+    /// Gets the current position of the ball.
+    /// </summary>
+    IPosition Position { get; }
   }
 }

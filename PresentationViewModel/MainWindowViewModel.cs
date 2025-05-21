@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using TP.ConcurrentProgramming.Presentation.Model;
 using TP.ConcurrentProgramming.Presentation.ViewModel.MVVMLight;
+using TP.ConcurrentProgramming.Data;
+using TP.ConcurrentProgramming.BusinessLogic;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
 
 namespace TP.ConcurrentProgramming.Presentation.ViewModel
@@ -32,6 +34,9 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     }
 
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
+
+    public double TableWidth => BusinessLogicAbstractAPI.TableWidth;
+    public double TableHeight => BusinessLogicAbstractAPI.TableHeight;
 
     #endregion public API
 
