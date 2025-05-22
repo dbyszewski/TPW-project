@@ -35,7 +35,7 @@
 
     #region private
 
-    private const double DefaultDiameter = 30.0;
+    private const double DefaultDiameter = 100.0;
     private const double DefaultMass = 1.0;
 
     private void RaiseNewPositionChangeNotification()
