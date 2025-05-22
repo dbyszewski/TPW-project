@@ -82,9 +82,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     private readonly TaskCompletionSource<bool> stopSource = new();
 
     private const double MIN_X = 0;
-    private const double MAX_X = 800;
+    private const double MAX_X = 796;
     private const double MIN_Y = 0;
-    private const double MAX_Y = 840;
+    private const double MAX_Y = 836;
 
     private async Task HandleCollisionsAsync()
     {
