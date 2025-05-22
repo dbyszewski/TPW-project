@@ -94,11 +94,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       var balls = BallsList.ToArray();
       var collisionTasks = new List<Task>();
 
+      // Obsługa kolizji ze ścianami
+      foreach (var ball in balls)
+      {
+        collisionTasks.Add(Task.Run(() => HandleWallCollisions(ball)));
+      }
+
+      // Obsługa kolizji między kulami
       for (int i = 0; i < balls.Length; i++)
       {
-        var ball = balls[i];
-        collisionTasks.Add(Task.Run(() => HandleWallCollisions(ball)));
-
         for (int j = i + 1; j < balls.Length; j++)
         {
           if (stopSource.Task.IsCompleted)
@@ -122,40 +126,43 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private void HandleWallCollisions(Ball ball)
     {
-      var position = ball.Position;
-      var velocity = ball.UnderneathBall.Velocity;
-      var diameter = ball.Diameter;
-      var newX = position.x;
-      var newY = position.y;
-      var newVelocityX = velocity.x;
-      var newVelocityY = velocity.y;
+      lock (LockObject)
+      {
+        var position = ball.Position;
+        var velocity = ball.UnderneathBall.Velocity;
+        var diameter = ball.Diameter;
+        var newX = position.x;
+        var newY = position.y;
+        var newVelocityX = velocity.x;
+        var newVelocityY = velocity.y;
 
-      if (newX < MIN_X && velocity.x < 0)
-      {
-        newX = MIN_X;
-        newVelocityX = -velocity.x;
-      }
-      else if (newX + diameter > MAX_X && velocity.x > 0)
-      {
-        newX = MAX_X - diameter;
-        newVelocityX = -velocity.x;
-      }
+        if (newX < MIN_X && velocity.x < 0)
+        {
+          newX = MIN_X;
+          newVelocityX = -velocity.x;
+        }
+        else if (newX + diameter > MAX_X && velocity.x > 0)
+        {
+          newX = MAX_X - diameter;
+          newVelocityX = -velocity.x;
+        }
 
-      if (newY < MIN_Y && velocity.y < 0)
-      {
-        newY = MIN_Y;
-        newVelocityY = -velocity.y;
-      }
-      else if (newY + diameter > MAX_Y && velocity.y > 0)
-      {
-        newY = MAX_Y - diameter;
-        newVelocityY = -velocity.y;
-      }
+        if (newY < MIN_Y && velocity.y < 0)
+        {
+          newY = MIN_Y;
+          newVelocityY = -velocity.y;
+        }
+        else if (newY + diameter > MAX_Y && velocity.y > 0)
+        {
+          newY = MAX_Y - diameter;
+          newVelocityY = -velocity.y;
+        }
 
-      // Aktualizacja pozycji i prędkości
-      if (newX != position.x || newY != position.y)
-      {
-        ball.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(newVelocityX, newVelocityY));
+        // Aktualizacja pozycji i prędkości
+        if (newX != position.x || newY != position.y)
+        {
+          ball.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(newVelocityX, newVelocityY));
+        }
       }
     }
 
@@ -169,37 +176,40 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private void ResolveCollision(Ball ball1, Ball ball2)
     {
-      // Calculate collision normal
-      double dx = ball2.Position.x - ball1.Position.x;
-      double dy = ball2.Position.y - ball1.Position.y;
-      double distance = Math.Sqrt(dx * dx + dy * dy);
-      double nx = dx / distance;
-      double ny = dy / distance;
+      lock (LockObject)
+      {
+        // Calculate collision normal
+        double dx = ball2.Position.x - ball1.Position.x;
+        double dy = ball2.Position.y - ball1.Position.y;
+        double distance = Math.Sqrt(dx * dx + dy * dy);
+        double nx = dx / distance;
+        double ny = dy / distance;
 
-      // Calculate relative velocity
-      double vx = ball2.UnderneathBall.Velocity.x - ball1.UnderneathBall.Velocity.x;
-      double vy = ball2.UnderneathBall.Velocity.y - ball1.UnderneathBall.Velocity.y;
-      double relativeVelocity = vx * nx + vy * ny;
+        // Calculate relative velocity
+        double vx = ball2.UnderneathBall.Velocity.x - ball1.UnderneathBall.Velocity.x;
+        double vy = ball2.UnderneathBall.Velocity.y - ball1.UnderneathBall.Velocity.y;
+        double relativeVelocity = vx * nx + vy * ny;
 
-      // Don't resolve if balls are moving apart
-      if (relativeVelocity > 0)
-        return;
+        // Don't resolve if balls are moving apart
+        if (relativeVelocity > 0)
+          return;
 
-      // Calculate impulse
-      double restitution = 1.0; // Perfectly elastic collision
-      double impulse = -(1 + restitution) * relativeVelocity;
-      impulse /= 1 / ball1.Mass + 1 / ball2.Mass;
+        // Calculate impulse
+        double restitution = 1.0; // Perfectly elastic collision
+        double impulse = -(1 + restitution) * relativeVelocity;
+        impulse /= 1 / ball1.Mass + 1 / ball2.Mass;
 
-      // Apply impulse
-      ball1.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(
-        ball1.UnderneathBall.Velocity.x - (impulse * nx / ball1.Mass),
-        ball1.UnderneathBall.Velocity.y - (impulse * ny / ball1.Mass)
-      ));
+        // Apply impulse
+        ball1.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(
+          ball1.UnderneathBall.Velocity.x - (impulse * nx / ball1.Mass),
+          ball1.UnderneathBall.Velocity.y - (impulse * ny / ball1.Mass)
+        ));
 
-      ball2.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(
-        ball2.UnderneathBall.Velocity.x + (impulse * nx / ball2.Mass),
-        ball2.UnderneathBall.Velocity.y + (impulse * ny / ball2.Mass)
-      ));
+        ball2.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(
+          ball2.UnderneathBall.Velocity.x + (impulse * nx / ball2.Mass),
+          ball2.UnderneathBall.Velocity.y + (impulse * ny / ball2.Mass)
+        ));
+      }
     }
 
     #endregion private
