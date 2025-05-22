@@ -93,6 +93,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
       var balls = BallsList.ToArray();
       var collisionTasks = new List<Task>();
+      var detectedCollisions = new List<(Ball, Ball)>();
 
       // Obsługa kolizji ze ścianami
       foreach (var ball in balls)
@@ -100,7 +101,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         collisionTasks.Add(Task.Run(() => HandleWallCollisions(ball)));
       }
 
-      // Obsługa kolizji między kulami
+      // Wykrywanie kolizji między kulami (sekwencyjnie)
       for (int i = 0; i < balls.Length; i++)
       {
         for (int j = i + 1; j < balls.Length; j++)
@@ -111,14 +112,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic
           var ball1 = balls[i];
           var ball2 = balls[j];
 
-          collisionTasks.Add(Task.Run(async () =>
+          if (CheckCollision(ball1, ball2))
           {
-            if (CheckCollision(ball1, ball2))
-            {
-              await Task.Run(() => ResolveCollision(ball1, ball2));
-            }
-          }));
+            detectedCollisions.Add((ball1, ball2));
+          }
         }
+      }
+
+      // Rozwiązywanie wykrytych kolizji
+      foreach (var (ball1, ball2) in detectedCollisions)
+      {
+        collisionTasks.Add(Task.Run(() => ResolveCollision(ball1, ball2)));
       }
 
       await Task.WhenAll(collisionTasks);
@@ -168,10 +172,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private bool CheckCollision(Ball ball1, Ball ball2)
     {
-      double dx = ball1.Position.x - ball2.Position.x;
-      double dy = ball1.Position.y - ball2.Position.y;
-      double distance = Math.Sqrt(dx * dx + dy * dy);
-      return distance < (ball1.Diameter + ball2.Diameter) / 2;
+      lock (LockObject)
+      {
+        double dx = ball1.Position.x - ball2.Position.x;
+        double dy = ball1.Position.y - ball2.Position.y;
+        double distance = Math.Sqrt(dx * dx + dy * dy);
+        return distance < (ball1.Diameter + ball2.Diameter) / 2;
+      }
     }
 
     private void ResolveCollision(Ball ball1, Ball ball2)
