@@ -24,6 +24,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     #region private
     internal readonly Data.IBall UnderneathBall;
 
+    public void Move(double deltaX, double deltaY)
+    {
+      // Tworzymy wektor przesunięcia i wywołujemy metodę Move z interfejsu Data.IBall
+      UnderneathBall.Move(Data.DataAbstractAPI.CreateVector(deltaX, deltaY));
+    }
+    
     private void RaisePositionChangeEvent(object? sender, Data.IVector e)
     {
       NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
