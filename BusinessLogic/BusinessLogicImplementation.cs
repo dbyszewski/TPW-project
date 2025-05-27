@@ -86,46 +86,54 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     private const double MIN_Y = 0;
     private const double MAX_Y = 836;
 
+    private bool isProcessingCollisions = false;
+
     private async Task HandleCollisionsAsync()
     {
       if (Disposed || stopSource.Task.IsCompleted)
         return;
 
-      var balls = BallsList.ToArray();
-      var collisionTasks = new List<Task>();
-      var detectedCollisions = new List<(Ball, Ball)>();
+      // Zapobieganie nakładaniu się wywołań
+      if (isProcessingCollisions)
+        return;
 
-      // Obsługa kolizji ze ścianami
-      foreach (var ball in balls)
+      try
       {
-        collisionTasks.Add(Task.Run(() => HandleWallCollisions(ball)));
-      }
+        isProcessingCollisions = true;
 
-      // Wykrywanie kolizji między kulami (sekwencyjnie)
-      for (int i = 0; i < balls.Length; i++)
-      {
-        for (int j = i + 1; j < balls.Length; j++)
+        var balls = BallsList.ToArray();
+        var collisionTasks = new List<Task>();
+        var detectedCollisions = new List<(Ball, Ball)>();
+
+        // Obsługa kolizji ze ścianami
+        foreach (var ball in balls)
         {
-          if (stopSource.Task.IsCompleted)
-            return;
+          HandleWallCollisions(ball);
+        }
 
-          var ball1 = balls[i];
-          var ball2 = balls[j];
-
-          if (CheckCollision(ball1, ball2))
+        // Wykrywanie kolizji między kulami (sekwencyjnie)
+        for (int i = 0; i < balls.Length; i++)
+        {
+          for (int j = i + 1; j < balls.Length; j++)
           {
-            detectedCollisions.Add((ball1, ball2));
+            if (stopSource.Task.IsCompleted)
+              return;
+
+            var ball1 = balls[i];
+            var ball2 = balls[j];
+
+            if (CheckCollision(ball1, ball2))
+            {
+              // Rozwiązujemy kolizje natychmiast zamiast kolejkować
+              ResolveCollision(ball1, ball2);
+            }
           }
         }
       }
-
-      // Rozwiązywanie wykrytych kolizji
-      foreach (var (ball1, ball2) in detectedCollisions)
+      finally
       {
-        collisionTasks.Add(Task.Run(() => ResolveCollision(ball1, ball2)));
+        isProcessingCollisions = false;
       }
-
-      await Task.WhenAll(collisionTasks);
     }
 
     private void HandleWallCollisions(Ball ball)
