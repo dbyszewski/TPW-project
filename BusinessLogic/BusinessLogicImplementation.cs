@@ -172,13 +172,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private bool CheckCollision(Ball ball1, Ball ball2)
     {
-      lock (LockObject)
-      {
-        double dx = ball1.Position.x - ball2.Position.x;
-        double dy = ball1.Position.y - ball2.Position.y;
-        double distance = Math.Sqrt(dx * dx + dy * dy);
-        return distance < (ball1.Diameter + ball2.Diameter) / 2;
-      }
+      double dx = ball1.Position.x - ball2.Position.x;
+      double dy = ball1.Position.y - ball2.Position.y;
+      double distance = Math.Sqrt(dx * dx + dy * dy);
+      return distance < (ball1.Diameter + ball2.Diameter) / 2;
     }
 
     private void ResolveCollision(Ball ball1, Ball ball2)
