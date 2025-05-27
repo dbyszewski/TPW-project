@@ -142,7 +142,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       {
         var position = ball.UnderneathBall.Position;
         var velocity = ball.UnderneathBall.Velocity;
-        var diameter = ball.UnderneathBall.Position;
+        var diameter = ball.UnderneathBall.Diameter;
         var newX = position.x;
         var newY = position.y;
         var newVelocityX = velocity.x;
@@ -183,7 +183,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
       double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
       double distance = Math.Sqrt(dx * dx + dy * dy);
-      return distance < (ball1.UnderneathBall.Position + ball2.UnderneathBall.Position) / 2;
+      return distance < (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2;
     }
 
     private void ResolveCollision(Ball ball1, Ball ball2)
