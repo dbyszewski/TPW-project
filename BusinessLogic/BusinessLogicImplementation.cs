@@ -140,9 +140,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
       lock (LockObject)
       {
-        var position = ball.Position;
+        var position = ball.UnderneathBall.Position;
         var velocity = ball.UnderneathBall.Velocity;
-        var diameter = ball.Diameter;
+        var diameter = ball.UnderneathBall.Position;
         var newX = position.x;
         var newY = position.y;
         var newVelocityX = velocity.x;
@@ -180,10 +180,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private bool CheckCollision(Ball ball1, Ball ball2)
     {
-      double dx = ball1.Position.x - ball2.Position.x;
-      double dy = ball1.Position.y - ball2.Position.y;
+      double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
+      double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
       double distance = Math.Sqrt(dx * dx + dy * dy);
-      return distance < (ball1.Diameter + ball2.Diameter) / 2;
+      return distance < (ball1.UnderneathBall.Position + ball2.UnderneathBall.Position) / 2;
     }
 
     private void ResolveCollision(Ball ball1, Ball ball2)
@@ -191,8 +191,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       lock (LockObject)
       {
         // Calculate collision normal
-        double dx = ball2.Position.x - ball1.Position.x;
-        double dy = ball2.Position.y - ball1.Position.y;
+        double dx = ball2.UnderneathBall.Position.x - ball1.UnderneathBall.Position.x;
+        double dy = ball2.UnderneathBall.UnderneathBall.Position.y - ball1.UnderneathBall.Position.y;
         double distance = Math.Sqrt(dx * dx + dy * dy);
         double nx = dx / distance;
         double ny = dy / distance;
