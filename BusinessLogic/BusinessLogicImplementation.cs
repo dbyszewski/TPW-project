@@ -80,14 +80,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly Data.DataAbstractAPI? dataLayer;
         private readonly ConcurrentBag<Ball> BallsList = new();
         private readonly object LockObject = new();
+        private readonly object ProcessingLockObject = new();
         private bool Disposed = false;
         private readonly Timer CollisionTimer;
         private readonly ConcurrentDictionary<(Ball, Ball), bool> checkedCollisions = new();
 
         private const double MIN_X = 0;
-        private const double MAX_X = 796;
+        private const double MAX_X = 792;
         private const double MIN_Y = 0;
-        private const double MAX_Y = 836;
+        private const double MAX_Y = 832;
 
         private bool isProcessingCollisions = false;
 
@@ -96,15 +97,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             if (Disposed)
                 return;
 
-            if (isProcessingCollisions)
-                return;
+            lock (ProcessingLockObject)
+            {
+                if (isProcessingCollisions)
+                    return;
+                isProcessingCollisions = true;
+            }
 
             try
             {
-                isProcessingCollisions = true;
                 checkedCollisions.Clear();
 
-                var balls = BallsList.ToArray();
+                Ball[] balls;
+                lock (LockObject)
+                {
+                    balls = BallsList.ToArray();
+                }
+
                 var tasks = new List<Task>();
                 var detectedCollisions = new ConcurrentBag<(Ball, Ball)>();
 
@@ -148,7 +157,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             }
             finally
             {
-                isProcessingCollisions = false;
+                lock (ProcessingLockObject)
+                {
+                    isProcessingCollisions = false;
+                }
             }
         }
 
@@ -195,13 +207,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private bool CheckCollision(Ball ball1, Ball ball2)
         {
-            double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
-            double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
-            double distance = Math.Sqrt(dx * dx + dy * dy);
-            
-            double minDistance = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 * 1.01;
-            
-            return distance <= minDistance;
+            lock (LockObject)
+            {
+                double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
+                double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
+                double distance = Math.Sqrt(dx * dx + dy * dy);
+                
+                double minDistance = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 * 1.01;
+                
+                return distance <= minDistance;
+            }
         }
 
         private void ResolveCollision(Ball ball1, Ball ball2)
