@@ -35,5 +35,6 @@
     double Mass { get; }
     IVector Position { get; }
     void UpdateVelocity(IVector newVelocity);
+    void UpdatePosition(IVector newPosition);
   }
 }

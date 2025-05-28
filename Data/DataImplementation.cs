@@ -66,7 +66,7 @@ namespace TP.ConcurrentProgramming.Data
 
     private readonly Timer MoveTimer;
     private readonly object LockObject = new();
-    private readonly ConcurrentBag<Ball> BallsList = new();
+    private readonly List<Ball> BallsList = new();
     private const double DefaultDiameter = 30.0;
     private const double TimeStep = 0.016; // 16ms
 
@@ -74,13 +74,16 @@ namespace TP.ConcurrentProgramming.Data
     {
       if (Disposed) return;
 
-      foreach (var ball in BallsList)
+      lock (LockObject)
       {
-        Vector delta = new(
-          ball.Velocity.x * TimeStep,
-          ball.Velocity.y * TimeStep
-        );
-        ball.Move(delta);
+        foreach (var ball in BallsList)
+        {
+          Vector delta = new(
+            ball.Velocity.x * TimeStep,
+            ball.Velocity.y * TimeStep
+          );
+          ball.Move(delta);
+        }
       }
     }
 
