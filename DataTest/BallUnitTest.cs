@@ -7,7 +7,7 @@
     public void ConstructorTestMethod()
     {
       Vector testingVector = new Vector(0.0, 0.0);
-      Ball newInstance = new(testingVector, testingVector);
+      Ball newInstance = new(testingVector, testingVector, 10, 10);
       Assert.IsNotNull(newInstance);
       Assert.IsNotNull(testingVector);
     }
@@ -16,7 +16,7 @@
     public void MoveTestMethod()
     {
       Vector initialPosition = new(10.0, 10.0);
-      Ball newInstance = new(initialPosition, new Vector(0.0, 0.0));
+      Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), 10, 10);
       IVector curentPosition = new Vector(0.0, 0.0);
       int numberOfCallBackCalled = 0;
       newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };
