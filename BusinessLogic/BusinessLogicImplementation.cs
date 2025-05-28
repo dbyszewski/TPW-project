@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Numerics;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -54,9 +56,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 if (disposing)
                 {
-                    stopSource.SetResult(true);
                     CollisionTimer.Dispose();
                     BallsList.Clear();
+                    checkedCollisions.Clear();
                     dataLayer?.Dispose();
                 }
                 Disposed = true;
@@ -80,7 +82,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly object LockObject = new();
         private bool Disposed = false;
         private readonly Timer CollisionTimer;
-        private readonly TaskCompletionSource<bool> stopSource = new();
+        private readonly ConcurrentDictionary<(Ball, Ball), bool> checkedCollisions = new();
 
         private const double MIN_X = 0;
         private const double MAX_X = 796;
@@ -91,45 +93,58 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private async Task HandleCollisionsAsync()
         {
-            if (Disposed || stopSource.Task.IsCompleted)
+            if (Disposed)
                 return;
 
-            // Zapobieganie nakładaniu się wywołań
             if (isProcessingCollisions)
                 return;
 
             try
             {
                 isProcessingCollisions = true;
+                checkedCollisions.Clear();
 
                 var balls = BallsList.ToArray();
-                var collisionTasks = new List<Task>();
-                var detectedCollisions = new List<(Ball, Ball)>();
+                var tasks = new List<Task>();
+                var detectedCollisions = new ConcurrentBag<(Ball, Ball)>();
 
-                // Obsługa kolizji ze ścianami
                 foreach (var ball in balls)
                 {
-                    HandleWallCollisions(ball);
+                    tasks.Add(Task.Run(() => HandleWallCollisions(ball)));
                 }
 
-                // Wykrywanie kolizji między kulami (sekwencyjnie)
                 for (int i = 0; i < balls.Length; i++)
                 {
-                    for (int j = i + 1; j < balls.Length; j++)
+                    var iCopy = i;
+                    tasks.Add(Task.Run(() =>
                     {
-                        if (stopSource.Task.IsCompleted)
-                            return;
-
-                        var ball1 = balls[i];
-                        var ball2 = balls[j];
-
-                        if (CheckCollision(ball1, ball2))
+                        for (int j = iCopy + 1; j < balls.Length; j++)
                         {
-                            // Rozwiązujemy kolizje natychmiast zamiast kolejkować
-                            ResolveCollision(ball1, ball2);
+                            var ball1 = balls[iCopy];
+                            var ball2 = balls[j];
+
+                            if (checkedCollisions.ContainsKey((ball1, ball2)) || checkedCollisions.ContainsKey((ball2, ball1)))
+                                continue;
+
+                            checkedCollisions.TryAdd((ball1, ball2), true);
+
+                            if (CheckCollision(ball1, ball2))
+                            {
+                                detectedCollisions.Add((ball1, ball2));
+                            }
                         }
-                    }
+                    }));
                 }
+
+                await Task.WhenAll(tasks);
+
+                // Rozwiązujemy wszystkie wykryte kolizje asynchronicznie
+                var resolveTasks = new List<Task>();
+                foreach (var (ball1, ball2) in detectedCollisions)
+                {
+                    resolveTasks.Add(Task.Run(() => ResolveCollision(ball1, ball2)));
+                }
+                await Task.WhenAll(resolveTasks);
             }
             finally
             {
@@ -171,7 +186,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     newVelocityY = -velocity.y;
                 }
 
-                // Aktualizacja pozycji i prędkości
                 if (newX != position.x || newY != position.y)
                 {
                     ball.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(newVelocityX, newVelocityY));
@@ -181,15 +195,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         private bool CheckCollision(Ball ball1, Ball ball2)
         {
-            // Obliczamy odległość między środkami piłek
             double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
             double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
             double distance = Math.Sqrt(dx * dx + dy * dy);
             
-            // Obliczamy minimalną odległość przy której powinna nastąpić kolizja
             double minDistance = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 * 1.01;
             
-            // Sprawdzamy czy piłki się stykają
             return distance <= minDistance;
         }
 
@@ -197,30 +208,24 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             lock (LockObject)
             {
-                // Calculate collision normal
                 double dx = ball2.UnderneathBall.Position.x - ball1.UnderneathBall.Position.x;
                 double dy = ball2.UnderneathBall.Position.y - ball1.UnderneathBall.Position.y;
                 double distance = Math.Sqrt(dx * dx + dy * dy);
                 
-                // Normalizacja wektora normalnego
                 double nx = dx / distance;
                 double ny = dy / distance;
 
-                // Calculate relative velocity
                 double vx = ball2.UnderneathBall.Velocity.x - ball1.UnderneathBall.Velocity.x;
                 double vy = ball2.UnderneathBall.Velocity.y - ball1.UnderneathBall.Velocity.y;
                 double relativeVelocity = vx * nx + vy * ny;
 
-                // Don't resolve if balls are moving apart
                 if (relativeVelocity > 0)
                     return;
 
-                // Calculate impulse
-                double restitution = 1.0; // Perfectly elastic collision
+                double restitution = 1.0;
                 double impulse = -(1 + restitution) * relativeVelocity;
                 impulse /= 1 / ball1.Mass + 1 / ball2.Mass;
 
-                // Apply impulse
                 ball1.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(
                   ball1.UnderneathBall.Velocity.x - (impulse * nx / ball1.Mass),
                   ball1.UnderneathBall.Velocity.y - (impulse * ny / ball1.Mass)
@@ -231,14 +236,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                   ball2.UnderneathBall.Velocity.y + (impulse * ny / ball2.Mass)
                 ));
 
-                // Zapobiegamy nakładaniu się piłek
                 double overlap = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 - distance;
                 if (overlap > 0)
                 {
                     double moveX = nx * overlap * 0.5;
                     double moveY = ny * overlap * 0.5;
                     
-                    // Używamy UpdatePosition zamiast Move
                     ball1.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(
                       ball1.UnderneathBall.Position.x - moveX,
                       ball1.UnderneathBall.Position.y - moveY

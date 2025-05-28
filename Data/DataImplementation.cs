@@ -21,7 +21,7 @@ namespace TP.ConcurrentProgramming.Data
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-        double mass = random.NextDouble() * 5 + 0.5; // 0.5 to 2.5
+        double mass = random.NextDouble() * 2 + 0.5; // 0.5 to 2.5
         double diameter = DefaultDiameter * Math.Sqrt(mass); // Średnica proporcjonalna do pierwiastka z masy
 
         Vector startingPosition = new(
