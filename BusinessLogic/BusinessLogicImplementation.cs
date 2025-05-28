@@ -192,7 +192,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       {
         // Calculate collision normal
         double dx = ball2.UnderneathBall.Position.x - ball1.UnderneathBall.Position.x;
-        double dy = ball2.UnderneathBall.UnderneathBall.Position.y - ball1.UnderneathBall.Position.y;
+        double dy = ball2.UnderneathBall.Position.y - ball1.UnderneathBall.Position.y;
         double distance = Math.Sqrt(dx * dx + dy * dy);
         double nx = dx / distance;
         double ny = dy / distance;

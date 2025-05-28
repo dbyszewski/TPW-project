@@ -2,19 +2,13 @@
 {
   internal class Ball : IBall
   {
-    #region ctor
-
-    internal Ball(Vector initialPosition, Vector initialVelocity, double diameter = DefaultDiameter, double mass = DefaultMass)
+    internal Ball(Vector initialPosition, Vector initialVelocity, double diameter, double mass)
     {
       Position = initialPosition;
       Velocity = initialVelocity;
       Diameter = diameter;
       Mass = mass;
     }
-
-    #endregion ctor
-
-    #region IBall
 
     public event EventHandler<IVector>? NewPositionNotification;
 
@@ -31,13 +25,6 @@
       Velocity = newVelocity;
     }
 
-    #endregion IBall
-
-    #region private
-
-    private const double DefaultDiameter = 100.0;
-    private const double DefaultMass = 1.0;
-
     private void RaiseNewPositionChangeNotification()
     {
       NewPositionNotification?.Invoke(this, Position);
@@ -48,7 +35,5 @@
       Position = new Vector(Position.x + delta.x, Position.y + delta.y);
       RaiseNewPositionChangeNotification();
     }
-
-    #endregion private
   }
 }
