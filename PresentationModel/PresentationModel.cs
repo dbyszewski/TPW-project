@@ -42,13 +42,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     #endregion ModelAbstractApi
 
-    #region API
 
     public event EventHandler<BallChaneEventArgs> BallChanged;
-
-    #endregion API
-
-    #region private
 
     private bool Disposed = false;
     private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
@@ -59,8 +54,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       ModelBall newBall = new ModelBall(position.x, position.y, ball);
       BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
     }
-
-    #endregion private
 
     #region TestingInfrastructure
 

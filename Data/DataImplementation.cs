@@ -5,46 +5,40 @@ namespace TP.ConcurrentProgramming.Data
 {
   internal class DataImplementation : DataAbstractAPI
   {
-    #region ctor
-
     public DataImplementation()
     {
-      MoveTimer = new Timer(_ => Move(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16)); // ~60 FPS
+      MoveTimer = new Timer(_ => Move(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16));
     }
-
-    #endregion ctor
-
-    #region DataAbstractAPI
 
     public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(DataImplementation));
+        
       if (upperLayerHandler == null)
         throw new ArgumentNullException(nameof(upperLayerHandler));
 
       Random random = new Random();
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(
-          random.Next((int)DefaultDiameter, (int)(800 - DefaultDiameter)), 
-          random.Next((int)DefaultDiameter, (int)(840 - DefaultDiameter))
-        );
-        Vector initialVelocity = new(
-          (random.NextDouble() - 0.5) * 200, // -100 to 100
-          (random.NextDouble() - 0.5) * 200
-        );
         double mass = random.NextDouble() * 2 + 0.5; // 0.5 to 2.5
-        Ball newBall = new(startingPosition, initialVelocity, DefaultDiameter, mass);
+        double diameter = DefaultDiameter * Math.Sqrt(mass); // Średnica proporcjonalna do pierwiastka z masy
+
+        Vector startingPosition = new(
+          random.Next((int)diameter, (int)(800 - diameter)), 
+          random.Next((int)diameter, (int)(840 - diameter))
+        );
+
+        Vector initialVelocity = new(
+          (random.NextDouble()) * 200, // -100 to 100
+          (random.NextDouble()) * 200
+        );
+
+        Ball newBall = new(startingPosition, initialVelocity, diameter, mass);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
     }
-
-    #endregion DataAbstractAPI
-
-    #region IDisposable
-
     protected virtual void Dispose(bool disposing)
     {
       if (!Disposed)
@@ -67,16 +61,12 @@ namespace TP.ConcurrentProgramming.Data
       GC.SuppressFinalize(this);
     }
 
-    #endregion IDisposable
-
-    #region private
-
     //private bool disposedValue;
     private bool Disposed = false;
 
     private readonly Timer MoveTimer;
     private readonly object LockObject = new();
-    private readonly ConcurrentBag<Ball> BallsList = new();
+    private readonly List<Ball> BallsList = new();
     private const double DefaultDiameter = 30.0;
     private const double TimeStep = 0.016; // 16ms
 
@@ -84,19 +74,18 @@ namespace TP.ConcurrentProgramming.Data
     {
       if (Disposed) return;
 
-      foreach (var ball in BallsList)
+      lock (LockObject)
       {
-        Vector delta = new(
-          ball.Velocity.x * TimeStep,
-          ball.Velocity.y * TimeStep
-        );
-        ball.Move(delta);
+        foreach (var ball in BallsList)
+        {
+          Vector delta = new(
+            ball.Velocity.x * TimeStep,
+            ball.Velocity.y * TimeStep
+          );
+          ball.Move(delta);
+        }
       }
     }
-
-    #endregion private
-
-    #region TestingInfrastructure
 
     [Conditional("DEBUG")]
     internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
@@ -115,7 +104,5 @@ namespace TP.ConcurrentProgramming.Data
     {
       returnInstanceDisposed(Disposed);
     }
-
-    #endregion TestingInfrastructure
   }
 }
