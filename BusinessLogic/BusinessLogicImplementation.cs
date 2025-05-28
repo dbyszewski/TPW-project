@@ -10,13 +10,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public BusinessLogicImplementation()
         {
-            CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 32);
+            CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 16);
         }
 
         public BusinessLogicImplementation(Data.DataAbstractAPI dataLayer)
         {
             this.dataLayer = dataLayer;
-            CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 32);
+            CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 16);
         }
 
         #endregion ctor
@@ -179,13 +179,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             }
         }
 
-    private bool CheckCollision(Ball ball1, Ball ball2)
-    {
-      double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
-      double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
-      double distance = Math.Sqrt(dx * dx + dy * dy);
-      return distance < (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2;
-    }
+        private bool CheckCollision(Ball ball1, Ball ball2)
+        {
+            // Obliczamy odległość między środkami piłek
+            double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
+            double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
+            double distance = Math.Sqrt(dx * dx + dy * dy);
+            
+            // Obliczamy minimalną odległość przy której powinna nastąpić kolizja
+            double minDistance = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 * 1.01;
+            
+            // Sprawdzamy czy piłki się stykają
+            return distance <= minDistance;
+        }
 
         private void ResolveCollision(Ball ball1, Ball ball2)
         {
@@ -195,7 +201,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 double dx = ball2.UnderneathBall.Position.x - ball1.UnderneathBall.Position.x;
                 double dy = ball2.UnderneathBall.Position.y - ball1.UnderneathBall.Position.y;
                 double distance = Math.Sqrt(dx * dx + dy * dy);
-
+                
                 // Normalizacja wektora normalnego
                 double nx = dx / distance;
                 double ny = dy / distance;
@@ -225,14 +231,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                   ball2.UnderneathBall.Velocity.y + (impulse * ny / ball2.Mass)
                 ));
 
+                // Zapobiegamy nakładaniu się piłek
                 double overlap = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 - distance;
                 if (overlap > 0)
                 {
                     double moveX = nx * overlap * 0.5;
                     double moveY = ny * overlap * 0.5;
-
-                    ball1.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(ball1.UnderneathBall.Position.x - moveX, ball1.UnderneathBall.Position.y - moveY));
-                    ball2.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(ball2.UnderneathBall.Position.x + moveX, ball2.UnderneathBall.Position.y + moveY));
+                    
+                    // Używamy UpdatePosition zamiast Move
+                    ball1.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(
+                      ball1.UnderneathBall.Position.x - moveX,
+                      ball1.UnderneathBall.Position.y - moveY
+                    ));
+                    
+                    ball2.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(
+                      ball2.UnderneathBall.Position.x + moveX,
+                      ball2.UnderneathBall.Position.y + moveY
+                    ));
                 }
             }
         }
