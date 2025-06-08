@@ -143,6 +143,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 foreach (var (ball1, ball2) in detectedCollisions)
                 {
                     resolveTasks.Add(Task.Run(() => ResolveCollision(ball1, ball2)));
+
                 }
                 await Task.WhenAll(resolveTasks);
             }
@@ -198,9 +199,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double dx = ball1.UnderneathBall.Position.x - ball2.UnderneathBall.Position.x;
             double dy = ball1.UnderneathBall.Position.y - ball2.UnderneathBall.Position.y;
             double distance = Math.Sqrt(dx * dx + dy * dy);
-            
+
             double minDistance = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 * 1.01;
-            
+
             return distance <= minDistance;
         }
 
@@ -208,28 +209,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             lock (LockObject)
             {
-                double dx = ball2.UnderneathBall.Position.x - ball1.UnderneathBall.Position.x;
-                double dy = ball2.UnderneathBall.Position.y - ball1.UnderneathBall.Position.y;
+                double dx = ball2.Position.x - ball1.Position.x;
+                double dy = ball2.Position.y - ball1.Position.y;
                 double distance = Math.Sqrt(dx * dx + dy * dy);
-                
-                // Normalizacja wektora normalnego
+
                 double nx = dx / distance;
                 double ny = dy / distance;
 
-                // Prędkości względne
                 double vx = ball2.UnderneathBall.Velocity.x - ball1.UnderneathBall.Velocity.x;
                 double vy = ball2.UnderneathBall.Velocity.y - ball1.UnderneathBall.Velocity.y;
                 double relativeVelocity = vx * nx + vy * ny;
 
-                // Jeśli piłki się oddalają, nie ma potrzeby rozwiązywania kolizji
                 if (relativeVelocity > 0)
                     return;
 
-                // Dla zderzenia sprężystego, prędkość względna po zderzeniu jest przeciwna
                 double impulse = -2.0 * relativeVelocity;
                 impulse /= 1 / ball1.Mass + 1 / ball2.Mass;
 
-                // Aktualizacja prędkości
                 ball1.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(
                   ball1.UnderneathBall.Velocity.x - (impulse * nx / ball1.Mass),
                   ball1.UnderneathBall.Velocity.y - (impulse * ny / ball1.Mass)
@@ -240,23 +236,26 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                   ball2.UnderneathBall.Velocity.y + (impulse * ny / ball2.Mass)
                 ));
 
-                // Zapobieganie nakładaniu się piłek
                 double overlap = (ball1.UnderneathBall.Diameter + ball2.UnderneathBall.Diameter) / 2 - distance;
                 if (overlap > 0)
                 {
                     double moveX = nx * overlap * 0.5;
                     double moveY = ny * overlap * 0.5;
-                    
+
                     ball1.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(
                       ball1.UnderneathBall.Position.x - moveX,
                       ball1.UnderneathBall.Position.y - moveY
                     ));
-                    
+
                     ball2.UnderneathBall.UpdatePosition(Data.DataAbstractAPI.CreateVector(
                       ball2.UnderneathBall.Position.x + moveX,
                       ball2.UnderneathBall.Position.y + moveY
                     ));
                 }
+                dataLayer.Log(
+                    "Ball_1:" + ball1.Position.x + ":" + ball1.Position.y
+                    + "Ball_2:" + ball2.Position.x + ":" + ball2.Position.y
+                    );
             }
         }
 
