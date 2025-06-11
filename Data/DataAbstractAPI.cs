@@ -1,40 +1,40 @@
 ﻿namespace TP.ConcurrentProgramming.Data
 {
-  public abstract class DataAbstractAPI : IDisposable
-  {
-    public static DataAbstractAPI GetDataLayer()
+    public abstract class DataAbstractAPI : IDisposable
     {
-      return modelInstance.Value;
+        public static DataAbstractAPI GetDataLayer()
+        {
+            return modelInstance.Value;
+        }
+
+        public static IVector CreateVector(double x, double y)
+        {
+            return new Vector(x, y);
+        }
+
+        public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
+        public abstract void Dispose();
+
+        public const double TableWidth = 800.0;
+        public const double TableHeight = 840.0;
+
+        private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
     }
 
-    public static IVector CreateVector(double x, double y)
+    public interface IVector
     {
-      return new Vector(x, y);
+        double x { get; init; }
+        double y { get; init; }
     }
 
-    public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
-    public abstract void Dispose();
-
-    public const double TableWidth = 800.0;
-    public const double TableHeight = 840.0;
-
-    private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
-  }
-
-  public interface IVector
-  {
-    double x { get; init; }
-    double y { get; init; }
-  }
-
-  public interface IBall
-  {
-    event EventHandler<IVector> NewPositionNotification;
-    IVector Velocity { get; set; }
-    double Diameter { get; }
-    double Mass { get; }
-    IVector Position { get; }
-    void UpdateVelocity(IVector newVelocity);
-    void UpdatePosition(IVector newPosition);
-  }
+    public interface IBall
+    {
+        event EventHandler<IVector> NewPositionNotification;
+        IVector Velocity { get; set; }
+        double Diameter { get; }
+        double Mass { get; }
+        IVector Position { get; }
+        void UpdateVelocity(IVector newVelocity);
+        void UpdatePosition(IVector newPosition);
+    }
 }
