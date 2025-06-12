@@ -1,8 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Collections.Generic;
+using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -12,6 +10,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public BusinessLogicImplementation()
         {
+            this.dataLayer = Data.DataAbstractAPI.GetDataLayer();
             CollisionTimer = new Timer(async _ => await HandleCollisionsAsync(), null, 0, 16);
         }
 
@@ -188,6 +187,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                 if (newX != position.x || newY != position.y)
                 {
+                    this.dataLayer.GetLogger().AddLog(ball.UnderneathBall);
+
                     ball.UnderneathBall.UpdateVelocity(Data.DataAbstractAPI.CreateVector(newVelocityX, newVelocityY));
                 }
             }
@@ -224,6 +225,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 // Jeśli piłki się oddalają, nie ma potrzeby rozwiązywania kolizji
                 if (relativeVelocity > 0)
                     return;
+
+                this.dataLayer.GetLogger().AddLog(ball1.UnderneathBall, ball2.UnderneathBall);
 
                 // Dla zderzenia sprężystego, prędkość względna po zderzeniu jest przeciwna
                 double impulse = -2.0 * relativeVelocity;

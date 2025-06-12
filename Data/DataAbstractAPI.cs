@@ -18,6 +18,8 @@
         public const double TableWidth = 800.0;
         public const double TableHeight = 840.0;
 
+        public abstract ILogger GetLogger();
+
         private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
     }
 
@@ -36,5 +38,11 @@
         IVector Position { get; }
         void UpdateVelocity(IVector newVelocity);
         void UpdatePosition(IVector newPosition);
+    }
+
+    public interface ILogger
+    {
+        void AddLog(IBall b1, IBall b2);
+        void AddLog(IBall ball);
     }
 }

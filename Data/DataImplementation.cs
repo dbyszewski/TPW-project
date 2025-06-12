@@ -5,7 +5,12 @@ namespace TP.ConcurrentProgramming.Data
     internal class DataImplementation : DataAbstractAPI
     {
 
-        private Logger Logger { get; set; }
+        public Logger Logger = new Logger();
+
+        public override ILogger GetLogger()
+        {
+            return Logger;
+        }
 
         public DataImplementation()
         {
@@ -24,7 +29,7 @@ namespace TP.ConcurrentProgramming.Data
             for (int i = 0; i < numberOfBalls; i++)
             {
                 double mass = random.NextDouble() * 2 + 0.5; // 0.5 to 2.5
-                double diameter = DefaultDiameter * Math.Sqrt(mass); // Średnica proporcjonalna do pierwiastka z masy
+                double diameter = DefaultDiameter * Math.Sqrt(mass) * 5; // Średnica proporcjonalna do pierwiastka z masy
 
                 Vector startingPosition = new(
                   random.Next((int)diameter, (int)(800 - diameter)),
@@ -40,8 +45,6 @@ namespace TP.ConcurrentProgramming.Data
                 upperLayerHandler(startingPosition, newBall);
                 BallsList.Add(newBall);
             }
-
-            Logger = new Logger(BallsList);
         }
         protected virtual void Dispose(bool disposing)
         {
